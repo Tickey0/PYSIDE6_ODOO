@@ -1,8 +1,8 @@
 from src.models.producto import Producto
 from src.services.odoo_client import OdooClient
 
-# Solo bienes (no servicios) que se pueden vender
-DOMINIO_BASE = [["sale_ok", "=", True], ["type", "=", "consu"]]
+# Solo bienes (no servicios) que se pueden vender y están en el Punto de Venta
+DOMINIO_BASE = [["sale_ok", "=", True], ["type", "=", "consu"], ["available_in_pos", "=", True]]
 
 
 class ProductoController:

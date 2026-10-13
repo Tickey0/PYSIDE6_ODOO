@@ -1,5 +1,6 @@
 import sys
 
+from PySide6.QtCore import Qt
 from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QTabWidget
 
@@ -29,6 +30,7 @@ class Ventana(QTabWidget):
 
 def paleta_clara(app: QApplication):
     app.setStyle("Fusion")
+    app.styleHints().setColorScheme(Qt.ColorScheme.Light)  # aunque Windows esté en modo oscuro
     claro = QPalette()
     claro.setColor(QPalette.Window, QColor("white"))
     claro.setColor(QPalette.WindowText, QColor("black"))
@@ -36,6 +38,12 @@ def paleta_clara(app: QApplication):
     claro.setColor(QPalette.Text, QColor("black"))
     claro.setColor(QPalette.Button, QColor("#f0f0f0"))
     claro.setColor(QPalette.ButtonText, QColor("black"))
+    # Si no se fijan, Windows en modo oscuro pone azul marino y negro en tablas y selección
+    claro.setColor(QPalette.AlternateBase, QColor("white"))
+    claro.setColor(QPalette.Highlight, QColor("#e6ff8c"))
+    claro.setColor(QPalette.HighlightedText, QColor("black"))
+    claro.setColor(QPalette.ToolTipBase, QColor("#ffffe1"))
+    claro.setColor(QPalette.ToolTipText, QColor("black"))
     app.setPalette(claro)
 
 

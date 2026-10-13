@@ -1,0 +1,1 @@
+# PYSIDE6_ODOO

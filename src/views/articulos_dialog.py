@@ -67,7 +67,7 @@ class ArticulosDialog(QDialog):
         else:
             self.mostrar(resultados)
 
-    def buscar(self):
+    def buscar(self):  # 🟠 CONSULTA F9: busca en el inventario
         patron = self.buscar_txt.text().strip() or "%"
         try:
             self.mostrar(self.controller.buscar(patron))

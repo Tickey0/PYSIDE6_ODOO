@@ -47,7 +47,7 @@ def paleta_clara(app: QApplication):
     app.setPalette(claro)
 
 
-def iniciar_sesion(odoo: OdooClient) -> dict | None:
+def iniciar_sesion(odoo: OdooClient) -> dict | None:  # 🟠 LOGIN 2: ventana de login
     """Muestra el login hasta que los datos sean correctos o el usuario salga."""
     while True:
         login = LoginView(f"{odoo.url} ({odoo.db})")
@@ -59,7 +59,7 @@ def iniciar_sesion(odoo: OdooClient) -> dict | None:
             QMessageBox.warning(None, "Ingreso", str(e))
 
 
-def main():
+def main():  # 🟠 LOGIN 1: lee .env y revisa que Odoo responda
     app = QApplication(sys.argv)
     paleta_clara(app)
     try:

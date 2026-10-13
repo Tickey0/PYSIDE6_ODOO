@@ -20,8 +20,8 @@ class ProductoController:
             self._tasas = {f["id"]: f["amount"] for f in filas}
         return sum(self._tasas.get(i, 0.0) for i in impuestos)
 
-    def _leer(self, domain: list, limit: int) -> list[Producto]:
-        filas = self.odoo.call("product.product", "search_read",
+    def _leer(self, domain: list, limit: int) -> list[Producto]:  # 🟠 CONSULTA 5: agrega DOMINIO_BASE
+        filas = self.odoo.call("product.product", "search_read",  # 🟠 CONSULTA 5: pide a Odoo
                                domain=DOMINIO_BASE + domain,
                                fields=list(Producto.CAMPOS),
                                limit=limit, order="name",
@@ -32,7 +32,7 @@ class ProductoController:
             p.iva = self._porcentaje_iva(p.impuestos)
         return productos
 
-    def por_codigo(self, codigo: str) -> list[Producto]:
+    def por_codigo(self, codigo: str) -> list[Producto]:  # 🟠 CONSULTA 4: filtro por código
         """Coincidencia exacta por codigo de barras o referencia interna."""
         return self._leer(["|", ["barcode", "=", codigo], ["default_code", "=", codigo]], limit=2)
 

@@ -46,7 +46,7 @@ class OdooClient:
         except requests.RequestException:
             raise OdooError(f"No se pudo conectar a {self.url}. ¿Odoo esta arrancado?")
 
-    def call(self, model: str, method: str, ids: list | None = None, **kwargs):
+    def call(self, model: str, method: str, ids: list | None = None, **kwargs):  # 🟠 CONSULTA 6 / VENTA: todas las llamadas a Odoo pasan por aquí
         """Llama a cualquier metodo publico de un modelo de Odoo."""
         body = dict(kwargs)
         if ids is not None:
@@ -54,7 +54,7 @@ class OdooClient:
         if self.context:
             body.setdefault("context", self.context)
         try:
-            r = self.http.post(f"{self.url}/json/2/{model}/{method}", json=body, timeout=self.timeout)
+            r = self.http.post(f"{self.url}/json/2/{model}/{method}", json=body, timeout=self.timeout)  # 🟠 EL POST A ODOO (JSON-2)
         except requests.RequestException:
             raise OdooError(f"No se pudo conectar a {self.url}. ¿Odoo esta arrancado?")
         if r.status_code == 200:
@@ -67,14 +67,14 @@ class OdooClient:
             mensaje = r.text[:300]
         raise OdooError(f"{model}.{method}: {mensaje}")
 
-    def login(self, usuario: str, password: str) -> dict:
+    def login(self, usuario: str, password: str) -> dict:  # 🟠 LOGIN 3
         """Valida usuario y contraseña, y que la clave API sea de ese mismo usuario.
 
         JSON-2 no acepta usuario/contraseña, asi que la contraseña se valida con
         /web/session/authenticate (ruta jsonrpc del cliente web, no deprecada).
         """
         try:
-            r = requests.post(f"{self.url}/web/session/authenticate", timeout=self.timeout, json={
+            r = requests.post(f"{self.url}/web/session/authenticate", timeout=self.timeout, json={  # 🟠 LOGIN 3: usuario y contraseña
                 "jsonrpc": "2.0", "method": "call",
                 "params": {"db": self.db, "login": usuario, "password": password},
             })
@@ -85,7 +85,7 @@ class OdooClient:
         if "error" in datos or not uid:
             raise OdooError("Usuario o contraseña incorrectos.")
 
-        ctx = self.call("res.users", "context_get")
+        ctx = self.call("res.users", "context_get")  # 🟠 LOGIN 4: ¿de quién es la clave API?
         if ctx.get("uid") != uid:
             raise OdooError("La clave API del archivo .env pertenece a otro usuario.")
         self.context = {"lang": ctx.get("lang"), "tz": ctx.get("tz")}

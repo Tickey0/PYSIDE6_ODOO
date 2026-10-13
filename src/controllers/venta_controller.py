@@ -28,7 +28,7 @@ class VentaController:
     def _ctx(self, **extra) -> dict:
         return {**self.odoo.context, **extra}
 
-    def _consumidor_final(self) -> int:
+    def _consumidor_final(self) -> int:  # 🟠 VENTA: cliente CONSUMIDOR FINAL
         ids = self.odoo.call("res.partner", "search", limit=1,
                              domain=[["vat", "=", CF_IDENTIFICACION]])
         if ids:
@@ -52,7 +52,7 @@ class VentaController:
             cliente = self._consumidor_final()
 
             paso = "crear el pedido de venta"
-            pedido_id = odoo.call("sale.order", "create", vals_list=[{
+            pedido_id = odoo.call("sale.order", "create", vals_list=[{  # 🟠 VENTA 1: crea el pedido
                 "partner_id": cliente,
                 # Sin posición fiscal: el IVA es el del producto, el mismo que muestra la factura.
                 # (Con la empresa en EE.UU. y el cliente en Ecuador, Odoo aplicaba "Foreign
@@ -66,7 +66,7 @@ class VentaController:
             hecho.append(f"pedido {pedido}")
 
             paso = "confirmar el pedido"
-            odoo.call("sale.order", "action_confirm", ids=[pedido_id])
+            odoo.call("sale.order", "action_confirm", ids=[pedido_id])  # 🟠 VENTA 2: confirma y crea la entrega
             hecho.append("pedido confirmado")
 
             paso = "validar la entrega (bajar el stock)"
@@ -75,9 +75,9 @@ class VentaController:
             for entrega in entregas:
                 for mov in odoo.call("stock.move", "read", ids=entrega["move_ids"],
                                      fields=["product_uom_qty"]):
-                    odoo.call("stock.move", "write", ids=[mov["id"]],
+                    odoo.call("stock.move", "write", ids=[mov["id"]],  # 🟠 VENTA 3: cantidad entregada
                               vals={"quantity": mov["product_uom_qty"], "picked": True})
-                res = odoo.call("stock.picking", "button_validate", ids=[entrega["id"]],
+                res = odoo.call("stock.picking", "button_validate", ids=[entrega["id"]],  # 🟠 VENTA 4: AQUÍ BAJA EL STOCK
                                 context=self._ctx(skip_backorder=True, skip_sms=True))
                 if isinstance(res, dict) and res.get("res_model"):
                     raise OdooError(f"Odoo pidió confirmar algo en la entrega ({res['res_model']}).")
@@ -85,26 +85,26 @@ class VentaController:
 
             paso = "crear la factura"
             ctx_pedido = self._ctx(active_model="sale.order", active_ids=[pedido_id])
-            asistente = odoo.call("sale.advance.payment.inv", "create", context=ctx_pedido,
+            asistente = odoo.call("sale.advance.payment.inv", "create", context=ctx_pedido,  # 🟠 VENTA 5: crea la factura
                                   vals_list=[{"advance_payment_method": "delivered"}])[0]
             odoo.call("sale.advance.payment.inv", "create_invoices", ids=[asistente], context=ctx_pedido)
             factura_id = odoo.call("sale.order", "read", ids=[pedido_id],
                                    fields=["invoice_ids"])[0]["invoice_ids"][-1]
 
             paso = "confirmar la factura"
-            odoo.call("account.move", "action_post", ids=[factura_id])
+            odoo.call("account.move", "action_post", ids=[factura_id])  # 🟠 VENTA 6: publica la factura
             hecho.append("factura confirmada")
 
             paso = "registrar el pago"
             ctx_factura = self._ctx(active_model="account.move", active_ids=[factura_id])
-            pago = odoo.call("account.payment.register", "create", context=ctx_factura,
+            pago = odoo.call("account.payment.register", "create", context=ctx_factura,  # 🟠 VENTA 7: registra el pago
                              vals_list=[{"journal_id": self._diario_pago()}])[0]
             odoo.call("account.payment.register", "action_create_payments", ids=[pago], context=ctx_factura)
 
             factura = odoo.call("account.move", "read", ids=[factura_id],
                                 fields=["name", "amount_total", "payment_state"])[0]
         except OdooError as e:
-            ya = f"\n\nYa quedó hecho en Odoo: {', '.join(hecho)}." if hecho else ""
+            ya = f"\n\nYa quedó hecho en Odoo: {', '.join(hecho)}." if hecho else ""  # 🟠 VENTA: si un paso falla, dice qué ya quedó hecho
             raise VentaError(f"No se pudo {paso}.\n\n{e}{ya}")
 
         return {

@@ -83,7 +83,7 @@ class CodigoDelegate(QStyledItemDelegate):
         editor.setText(str(index.data(Qt.EditRole) or ""))
         editor.selectAll()
 
-    def eventFilter(self, editor, event):
+    def eventFilter(self, editor, event):  # 🟠 CONSULTA 1: Enter / F9 / Shift+F6 en la celda del código
         if event.type() == QEvent.KeyPress:
             tecla, shift = event.key(), bool(event.modifiers() & Qt.ShiftModifier)
             if tecla in (Qt.Key_Return, Qt.Key_Enter):
@@ -122,7 +122,7 @@ class DetalleFactura(QWidget):
         self.fila = 0                # fila del cursor (len(lineas) = fila en blanco del final)
         self._borrador = (0, "")     # (fila, texto) escrito en una fila vacía, sin buscar aún
 
-        self.tabla = DataTable()
+        self.tabla = DataTable()  # 🟠 TABLA del jefe (table/app.py)
         # La DataTable exige 640x480 como mínimo; en una ventana más baja la parte de abajo
         # de la factura se montaba encima de la tabla y tapaba la fila del cursor
         self.tabla.setMinimumSize(0, 0)
@@ -143,7 +143,7 @@ class DetalleFactura(QWidget):
             if hijo is not self.tabla.tableView:
                 hijo.hide()
 
-    def _preparar_vista(self):
+    def _preparar_vista(self):  # 🟠 TABLA: ajustes a la librería DataTable
         vista = self.tabla.tableView
         vista.setStyleSheet(ESTILO)
         vista.setAlternatingRowColors(False)  # la DataTable trae filas alternadas (azul en Windows oscuro)
@@ -217,7 +217,7 @@ class DetalleFactura(QWidget):
                 "total": f"{cantidad * p.precio:.2f}", "iva": f"{p.iva:g}", "ice": "0.00",
             })
         # Directo al modelo y no con DataTable.setData(): esa devuelve el scroll a donde estaba
-        self.tabla.getModelInstance().setModelData(filas)
+        self.tabla.getModelInstance().setModelData(filas)  # 🟠 TABLA: carga las filas en la DataTable
         self._esconder_controles()
         QTimer.singleShot(0, self._ajustar_columnas)  # por si apareció la barra de scroll vertical
         self.cambio.emit()
@@ -279,7 +279,7 @@ class DetalleFactura(QWidget):
     def _vacia(self, fila: int) -> bool:
         return fila >= len(self.lineas) or self.lineas[fila] is None
 
-    def _tecla(self, accion: str, texto: str):
+    def _tecla(self, accion: str, texto: str):  # 🟠 CONSULTA 2: decide qué hacer con la tecla
         if self._vacia(self.fila):
             self._borrador = (self.fila, texto)
         if accion == "buscar":
@@ -291,14 +291,14 @@ class DetalleFactura(QWidget):
         elif accion == "borrar":
             # Vacía la fila (no la quita): el cursor se queda ahí para escribir otro código
             if not self._vacia(self.fila):
-                self.lineas[self.fila] = None
+                self.lineas[self.fila] = None  # 🟠 Shift+F6: vacía la fila
             self._borrador = (self.fila, "")
             self._refrescar()
         elif accion in ("arriba", "abajo"):
             self.fila += -1 if accion == "arriba" else 1
             self._refrescar()
 
-    def _buscar(self, texto: str):
+    def _buscar(self, texto: str):  # 🟠 CONSULTA 3: separa cantidad y código
         if not texto:
             if self.fila < len(self.lineas):
                 self.fila += 1
@@ -306,13 +306,13 @@ class DetalleFactura(QWidget):
             return
         cantidad, termino = separar_cantidad(texto)
         try:
-            exactos = self.controller.por_codigo(termino)
+            exactos = self.controller.por_codigo(termino)  # 🟠 CONSULTA 3a: código exacto
             if len(exactos) == 1:
                 self._poner(exactos[0], cantidad)
                 return
             # No es un código exacto: buscar por "empieza con" y luego "contiene"
             patron = f"{termino}%"
-            resultados = self.controller.buscar(patron)
+            resultados = self.controller.buscar(patron)  # 🟠 CONSULTA 3b: por nombre
             if not resultados:
                 patron = f"%{termino}%"
                 resultados = self.controller.buscar(patron)
@@ -336,7 +336,7 @@ class DetalleFactura(QWidget):
         else:
             self._refrescar()
 
-    def _poner(self, p: Producto, cantidad: float):
+    def _poner(self, p: Producto, cantidad: float):  # 🟠 CONSULTA 8: llena la fila
         if self.fila < len(self.lineas):
             self.lineas[self.fila] = (p, cantidad)
         else:

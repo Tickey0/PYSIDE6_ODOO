@@ -3,7 +3,7 @@ from typing import ClassVar
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class Producto(BaseModel):
+class Producto(BaseModel):  # 🟠 CONSULTA 7: convierte la respuesta de Odoo
     """Un registro de product.product tal como lo devuelve search_read."""
     model_config = ConfigDict(populate_by_name=True)
 

@@ -201,7 +201,7 @@ class PantallaFactura(QWidget):
             self.res[k].setText(f"{v:.2f}")
         self.total.setText(f"{t0 + tiva + iva:.2f}")
 
-    def guardar(self):
+    def guardar(self):  # 🟠 VENTA 0: Alt+G o botón Guardar
         lineas = self.detalle.productos()
         if not lineas:
             QMessageBox.information(self, "Guardar", "La factura no tiene productos.")
@@ -228,7 +228,7 @@ class PantallaFactura(QWidget):
 
         QApplication.setOverrideCursor(Qt.WaitCursor)
         try:
-            r = self.ventas.guardar(lineas)
+            r = self.ventas.guardar(lineas)  # 🟠 VENTA 0: pasa al controlador
         except VentaError as e:
             QApplication.restoreOverrideCursor()
             QMessageBox.critical(self, "No se guardó completa", str(e))

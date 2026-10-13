@@ -31,7 +31,9 @@ class Producto(BaseModel):
     @classmethod
     def nombre_many2one(cls, v):
         # Los many2one llegan como [id, "Nombre"] o False
-        return v[1] if isinstance(v, (list, tuple)) else ""
+        if isinstance(v, (list, tuple)):
+            return v[1]
+        return v or ""
 
     @property
     def codigo(self) -> str:

@@ -1,6 +1,7 @@
 """Carga 8 productos de prueba con stock en Odoo usando JSON-2.
 
-Se puede correr varias veces: si un producto ya existe (misma referencia), lo salta.
+Se puede correr varias veces: si un producto ya existe (misma referencia) no lo
+duplica, solo le ajusta el stock si no coincide.
 Uso:  python -m scripts.cargar_inventario
 """
 from src.services.odoo_client import OdooClient
@@ -27,32 +28,38 @@ def main():
     ubicacion = bodega[0]["lot_stock_id"][0]
 
     for nombre, ref, barras, precio, con_iva, stock in PRODUCTOS:
-        if odoo.call("product.product", "search_count", domain=[["default_code", "=", ref]]):
+        existe = odoo.call("product.product", "search_read", limit=1,
+                           domain=[["default_code", "=", ref]], fields=["qty_available"])
+        if existe:
+            producto_id, actual = existe[0]["id"], existe[0]["qty_available"]
             print(f"Ya existe: {ref} {nombre}")
-            continue
+        else:
+            # Crear el producto (product.template crea también su product.product)
+            tmpl_id = odoo.call("product.template", "create", vals_list=[{
+                "name": nombre,
+                "default_code": ref,
+                "barcode": barras,
+                "list_price": precio,
+                "type": "consu",
+                "is_storable": True,
+                "available_in_pos": True,
+                "taxes_id": [[6, 0, iva15 if con_iva else []]],
+            }])[0]
+            producto_id = odoo.call("product.product", "search",
+                                    domain=[["product_tmpl_id", "=", tmpl_id]], limit=1)[0]
+            actual = 0
+            print(f"Creado:    {ref} {nombre}  precio {precio}")
 
-        # Crear el producto (product.template crea también su product.product)
-        tmpl_id = odoo.call("product.template", "create", vals_list=[{
-            "name": nombre,
-            "default_code": ref,
-            "barcode": barras,
-            "list_price": precio,
-            "type": "consu",
-            "is_storable": True,
-            "available_in_pos": True,
-            "taxes_id": [[6, 0, iva15 if con_iva else []]],
-        }])[0]
-        producto_id = odoo.call("product.product", "search",
-                                domain=[["product_tmpl_id", "=", tmpl_id]], limit=1)[0]
+        if actual != stock:
+            # Poner la cantidad en bodega: ajuste de inventario y aplicarlo
+            quant_id = odoo.call("stock.quant", "create", context={"inventory_mode": True}, vals_list=[{
+                "product_id": producto_id,
+                "location_id": ubicacion,
+                "inventory_quantity": stock,
+            }])[0]
+            odoo.call("stock.quant", "action_apply_inventory", ids=[quant_id])
+            print(f"           stock {actual:g} -> {stock}")
 
-        # Poner la cantidad en bodega: ajuste de inventario y aplicarlo
-        quant_id = odoo.call("stock.quant", "create", context={"inventory_mode": True}, vals_list=[{
-            "product_id": producto_id,
-            "location_id": ubicacion,
-            "inventory_quantity": stock,
-        }])[0]
-        odoo.call("stock.quant", "action_apply_inventory", ids=[quant_id])
-        print(f"Creado:   {ref} {nombre}  precio {precio}  stock {stock}")
 
 if __name__ == "__main__":
     main()

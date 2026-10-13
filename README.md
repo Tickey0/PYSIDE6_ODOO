@@ -38,6 +38,7 @@ Son varias llamadas JSON-2 seguidas: si una falla, el mensaje dice qué alcanzó
 quedar hecho en Odoo para terminarlo a mano.
 
 Guía paso a paso para revisarlo en Odoo: [docs/guia_odoo.md](docs/guia_odoo.md).
+Guía del código (qué archivo llama a cuál y qué JSON viaja a Odoo): [docs/guia_codigo.md](docs/guia_codigo.md).
 
 | Ver en Odoo | Menú |
 |---|---|

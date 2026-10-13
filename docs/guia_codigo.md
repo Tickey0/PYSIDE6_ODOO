@@ -1,7 +1,20 @@
 # Guía del código: cómo viaja una consulta y una venta hasta Odoo
 
-Para entender y editar la app. Los caminos van en **naranja** en los diagramas, y en el
-código cada paso está marcado con 🟠. Los links llevan a la línea exacta en GitHub.
+Para entender y editar la app. Los caminos van en **naranja** en los diagramas, y los links
+llevan a la línea exacta en GitHub.
+
+**En el código, cada línea de un camino tiene al final una marca 🟠** con el mismo nombre y
+número que esta guía. Para verlas todas de una vez, en VS Code: **Ctrl+Shift+F** y buscar `🟠`
+(o `🟠 VENTA`, `🟠 CONSULTA`…).
+
+| Marca en el código | Camino |
+|---|---|
+| `# 🟠 CONSULTA 1` … `# 🟠 CONSULTA 8` | Escribir un código + Enter, hasta que la fila se llena (sección 1) |
+| `# 🟠 CONSULTA F9` | Buscar en el Maestro de Artículos |
+| `# 🟠 VENTA 0` … `# 🟠 VENTA 7` | Alt+G: pedido, entrega (**VENTA 4: aquí baja el stock**), factura y pago (sección 2) |
+| `# 🟠 LOGIN 1` … `# 🟠 LOGIN 4` | Entrar a la app (sección 3) |
+| `# 🟠 TABLA` | La DataTable del jefe y sus ajustes (sección 4) |
+| `# 🟠 EL POST A ODOO (JSON-2)` | La única línea que manda datos a Odoo |
 
 ## 0. Mapa del proyecto (MVC)
 
@@ -60,14 +73,14 @@ flowchart LR
 
 | Paso | Archivo y línea | Qué pasa |
 |---|---|---|
-| 🟠 1 | [detalle_factura.py:86](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L86) `CodigoDelegate.eventFilter` | Atrapa Enter en la celda del código y emite `("buscar", "4.5")` |
-| 🟠 2 | [detalle_factura.py:282](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L282) `_tecla` | Decide qué hacer según la tecla |
-| 🟠 3 | [detalle_factura.py:301](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L301) `_buscar` | `separar_cantidad("4.5")` → cantidad **4**, código **5**. Pide el código exacto ([línea 309](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L309)); si no hay, busca por nombre ([línea 315](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L315)) |
-| 🟠 4 | [producto_controller.py:35](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/producto_controller.py#L35) `por_codigo` | Arma el filtro: código de barras **o** referencia igual a `5` |
-| 🟠 5 | [producto_controller.py:23](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/producto_controller.py#L23) `_leer` | Agrega `DOMINIO_BASE` (solo bienes, vendibles y del PdV) y llama a Odoo |
-| 🟠 6 | [odoo_client.py:49](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/services/odoo_client.py#L49) `call` | **Aquí sale el POST a Odoo** ([línea 57](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/services/odoo_client.py#L57)) |
-| 7 | [producto.py:6](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/models/producto.py#L6) `Producto` | Convierte la respuesta: `uom_id [1, "Unidades"]` → `"Unidades"` |
-| 8 | [detalle_factura.py:339](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L339) `_poner` | Pone el producto en la fila y salta a la fila en blanco |
+| 🟠 1 | [detalle_factura.py:86](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L86) `CodigoDelegate.eventFilter` | Atrapa Enter en la celda del código y emite `("buscar", "4.5")` |
+| 🟠 2 | [detalle_factura.py:282](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L282) `_tecla` | Decide qué hacer según la tecla |
+| 🟠 3 | [detalle_factura.py:301](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L301) `_buscar` | `separar_cantidad("4.5")` → cantidad **4**, código **5**. Pide el código exacto ([línea 309](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L309)); si no hay, busca por nombre ([línea 315](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L315)) |
+| 🟠 4 | [producto_controller.py:35](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/producto_controller.py#L35) `por_codigo` | Arma el filtro: código de barras **o** referencia igual a `5` |
+| 🟠 5 | [producto_controller.py:23](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/producto_controller.py#L23) `_leer` | Agrega `DOMINIO_BASE` (solo bienes, vendibles y del PdV) y llama a Odoo |
+| 🟠 6 | [odoo_client.py:49](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/services/odoo_client.py#L49) `call` | **Aquí sale el POST a Odoo** ([línea 57](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/services/odoo_client.py#L57)) |
+| 7 | [producto.py:6](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/models/producto.py#L6) `Producto` | Convierte la respuesta: `uom_id [1, "Unidades"]` → `"Unidades"` |
+| 8 | [detalle_factura.py:339](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L339) `_poner` | Pone el producto en la fila y salta a la fila en blanco |
 
 El corazón, `OdooClient.call` en `src/services/odoo_client.py` (resumido, sin el manejo de errores):
 
@@ -113,9 +126,9 @@ Lo que Odoo **responde**:
 ```
 
 `taxes_id: [1]` es el impuesto 15%. El controlador lo traduce a porcentaje con
-`account.tax/search_read` (una sola vez, [línea 15](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/producto_controller.py#L15)).
+`account.tax/search_read` (una sola vez, [línea 15](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/producto_controller.py#L15)).
 
-**F9** hace el mismo camino, pero por [`ArticulosDialog.buscar`](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/articulos_dialog.py#L70)
+**F9** hace el mismo camino, pero por [`ArticulosDialog.buscar`](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/articulos_dialog.py#L70)
 → `ProductoController.buscar` → `OdooClient.call`.
 
 ---
@@ -141,15 +154,15 @@ flowchart TB
 
 | Paso | Archivo y línea | Llamada JSON-2 | Qué hace Odoo |
 |---|---|---|---|
-| 🟠 0 | [factura_datatable_view.py:204](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/factura_datatable_view.py#L204) `guardar` | — | Revisa stock, pide confirmación y llama al controlador ([línea 231](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/factura_datatable_view.py#L231)) |
-| 🟠 | [venta_controller.py:31](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L31) | `res.partner/search` (y `create` la 1ra vez) | Busca el cliente CONSUMIDOR FINAL (9999999999999) |
-| 🟠 1 | [venta_controller.py:55](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L55) | `sale.order/create` | Crea el **pedido** con las líneas (producto, cantidad, precio) |
-| 🟠 2 | [venta_controller.py:69](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L69) | `sale.order/action_confirm` | Confirma el pedido y **crea la entrega** `WH/OUT/...` |
-| 🟠 3 | [venta_controller.py:78](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L78) | `stock.move/write` | Marca cuánto se entrega de cada producto |
-| 🟠 4 | [venta_controller.py:80](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L80) | `stock.picking/button_validate` | **Valida la entrega: aquí baja el stock** |
-| 🟠 5 | [venta_controller.py:88](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L88) | `sale.advance.payment.inv/create` + `create_invoices` | Crea la **factura** desde el pedido |
-| 🟠 6 | [venta_controller.py:95](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L95) | `account.move/action_post` | **Publica** la factura (`INV/2026/...`) |
-| 🟠 7 | [venta_controller.py:100](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L100) | `account.payment.register/create` + `action_create_payments` | Registra el **pago** (diario Efectivo, o Banco si no hay) |
+| 🟠 0 | [factura_datatable_view.py:204](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/factura_datatable_view.py#L204) `guardar` | — | Revisa stock, pide confirmación y llama al controlador ([línea 231](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/factura_datatable_view.py#L231)) |
+| 🟠 | [venta_controller.py:31](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L31) | `res.partner/search` (y `create` la 1ra vez) | Busca el cliente CONSUMIDOR FINAL (9999999999999) |
+| 🟠 1 | [venta_controller.py:55](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L55) | `sale.order/create` | Crea el **pedido** con las líneas (producto, cantidad, precio) |
+| 🟠 2 | [venta_controller.py:69](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L69) | `sale.order/action_confirm` | Confirma el pedido y **crea la entrega** `WH/OUT/...` |
+| 🟠 3 | [venta_controller.py:78](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L78) | `stock.move/write` | Marca cuánto se entrega de cada producto |
+| 🟠 4 | [venta_controller.py:80](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L80) | `stock.picking/button_validate` | **Valida la entrega: aquí baja el stock** |
+| 🟠 5 | [venta_controller.py:88](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L88) | `sale.advance.payment.inv/create` + `create_invoices` | Crea la **factura** desde el pedido |
+| 🟠 6 | [venta_controller.py:95](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L95) | `account.move/action_post` | **Publica** la factura (`INV/2026/...`) |
+| 🟠 7 | [venta_controller.py:100](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L100) | `account.payment.register/create` + `action_create_payments` | Registra el **pago** (diario Efectivo, o Banco si no hay) |
 
 El JSON del paso 1 (lo que se manda a `POST /json/2/sale.order/create`), con 4 chocolates:
 
@@ -170,7 +183,7 @@ El JSON del paso 1 (lo que se manda a `POST /json/2/sale.order/create`), con 4 c
 
 **Importante:** cada llamada JSON-2 es una transacción aparte. Si Odoo falla en el paso 5, los
 pasos 1–4 ya quedaron guardados. Por eso el error dice *"Ya quedó hecho en Odoo: …"*
-([línea 107](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/venta_controller.py#L107)).
+([línea 107](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L107)).
 La mejora a futuro es un módulo de Odoo con un solo método que haga todo junto.
 
 ---
@@ -179,9 +192,9 @@ La mejora a futuro es un módulo de Odoo con un solo método que haga todo junto
 
 | Paso | Archivo y línea | Qué pasa |
 |---|---|---|
-| 🟠 1 | [main.py:62](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/main.py#L62) `main` | Lee `.env` (`OdooClient.desde_env`) y prueba `GET /web/version` |
-| 🟠 2 | [main.py:50](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/main.py#L50) `iniciar_sesion` | Muestra el login (admin/admin) |
-| 🟠 3 | [odoo_client.py:70](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/services/odoo_client.py#L70) `login` | `POST /web/session/authenticate`: valida usuario y contraseña |
+| 🟠 1 | [main.py:62](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/main.py#L62) `main` | Lee `.env` (`OdooClient.desde_env`) y prueba `GET /web/version` |
+| 🟠 2 | [main.py:50](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/main.py#L50) `iniciar_sesion` | Muestra el login (admin/admin) |
+| 🟠 3 | [odoo_client.py:70](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/services/odoo_client.py#L70) `login` | `POST /web/session/authenticate`: valida usuario y contraseña |
 | 🟠 4 | mismo método | `POST /json/2/res.users/context_get`: Odoo dice **de quién es la clave API**. Si no es del mismo usuario, no entra |
 
 JSON-2 **no acepta** usuario y contraseña, solo la clave API. Por eso el login valida la
@@ -200,15 +213,15 @@ y solo se configura desde `detalle_factura.py`.
 
 | En `table/app.py` del jefe | En `src/views/detalle_factura.py` |
 |---|---|
-| `self.data_table = DataTable()` | `self.tabla = DataTable()` ([línea 125](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L125)) |
+| `self.data_table = DataTable()` | `self.tabla = DataTable()` ([línea 125](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L125)) |
 | `_filterState.itemsPerPage = 1000` | `getFilterStateInstance().itemsPerPage = 100_000` (sin paginación) |
 | `setColumns([("id","ID",DataType.STRING), ...])` | `setColumns(...)` con las 10 columnas de la factura (lista `COLUMNAS`) |
 | `setEditableColumns({"id": True})` | `setEditableColumns({"codigo": True})`: solo se edita el código |
-| `setData(data)` con datos fijos | `getModelInstance().setModelData(filas)` con los productos de Odoo ([línea 220](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L220)) |
+| `setData(data)` con datos fijos | `getModelInstance().setModelData(filas)` con los productos de Odoo ([línea 220](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L220)) |
 | Enter agrega una fila vacía | Enter **busca el producto en Odoo**, llena la fila y salta a la fila en blanco |
-| Shift+F6 **borra** la fila (`del model._data[row]`) | Shift+F6 **vacía** la fila y la deja para reescribir ([línea 294](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L294)) |
+| Shift+F6 **borra** la fila (`del model._data[row]`) | Shift+F6 **vacía** la fila y la deja para reescribir ([línea 294](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L294)) |
 
-Lo que hubo que ajustarle a la librería (todo en [`_preparar_vista`](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/views/detalle_factura.py#L146)):
+Lo que hubo que ajustarle a la librería (todo en [`_preparar_vista`](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/detalle_factura.py#L146)):
 
 | La librería traía | Problema | Ajuste |
 |---|---|---|
@@ -225,7 +238,7 @@ Lo que hubo que ajustarle a la librería (todo en [`_preparar_vista`](https://gi
 
 | Quiero… | Dónde |
 |---|---|
-| Que aparezcan otros productos (ej. también servicios) | `DOMINIO_BASE` en [producto_controller.py:5](https://github.com/Tickey0/PYSIDE6_ODOO/blob/9457036/src/controllers/producto_controller.py#L5) |
+| Que aparezcan otros productos (ej. también servicios) | `DOMINIO_BASE` en [producto_controller.py:5](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/producto_controller.py#L5) |
 | Traer otro campo de Odoo (ej. `categ_id`) | Agregarlo a `CAMPOS` y como campo en `src/models/producto.py` |
 | Agregar o cambiar una columna de la factura | Lista `COLUMNAS` y diccionario de `_refrescar` en `detalle_factura.py` |
 | Cambiar qué columnas crecen más | `PESOS` en `detalle_factura.py` |

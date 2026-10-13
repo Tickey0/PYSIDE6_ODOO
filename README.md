@@ -24,7 +24,7 @@ Login: `admin` / `admin`.
 | ↑ ↓ | Cambia de línea |
 | Shift+F6 | Vacía la línea donde está el cursor (no la quita): queda en blanco para escribir otro código |
 | Ctrl+F | Buscar una línea dentro de la factura (código o descripción). Enter = la siguiente, Esc = volver |
-| Alt+G | Guardar |
+| Ctrl+G | Guardar |
 
 Solo aparecen productos de tipo Bienes, que se venden y con "Disponible en PdV".
 

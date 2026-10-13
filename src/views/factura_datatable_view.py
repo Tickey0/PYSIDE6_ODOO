@@ -1,12 +1,12 @@
 """Pantalla de factura (contenedor): buscador + fecha, DetalleFactura, franja de totales.
 
-Atajos: Ctrl+F buscar una línea en la factura · Alt+G (o soltar Alt y luego G) guardar.
+Atajos: Ctrl+F buscar una línea en la factura · Ctrl+G guardar.
 La versión anterior, con la grilla de 10 filas, sigue en factura_view.py.
 """
 from collections import defaultdict
 from datetime import datetime
 
-from PySide6.QtCore import QEvent, Qt, QTimer
+from PySide6.QtCore import QEvent, Qt
 from PySide6.QtGui import QKeySequence, QShortcut
 from PySide6.QtWidgets import (
     QApplication, QFrame, QHBoxLayout, QLabel, QLineEdit, QMessageBox,
@@ -32,7 +32,7 @@ QLabel#total { background: #e3f5e3; border: 1px solid #9ccc9c; border-radius: 4p
                padding: 2px 14px; font-size: 24px; font-weight: bold; }
 QPushButton#guardar { background: #f4f6fb; color: #000080; border: 1px solid #000080;
                       border-radius: 4px; padding: 6px 14px; font-size: 13px; font-weight: bold; }
-QPushButton#guardar:hover, QPushButton#guardar[atajo="true"] { background: #e6ff8c; }
+QPushButton#guardar:hover { background: #e6ff8c; }
 QPushButton#guardar:pressed { background: #d4ef70; }
 """
 
@@ -80,7 +80,7 @@ class PantallaFactura(QWidget):
 
         ayuda = QLabel("Enter: buscar    F9: inventario    ↑ ↓: cambiar de línea    "
                        "5.CODIGO: cantidad 5    Shift+F6: vaciar la línea    "
-                       "Ctrl+F: buscar en la factura    Alt+G: guardar")
+                       "Ctrl+F: buscar en la factura    Ctrl+G: guardar")
         ayuda.setObjectName("ayuda")
         raiz.addWidget(ayuda)
 
@@ -105,11 +105,10 @@ class PantallaFactura(QWidget):
             self.res[clave] = e
         fila.addStretch(1)
 
-        # "&G": la G sale subrayada y Alt+G presiona el botón, como en el sistema anterior
-        self.btn_guardar = QPushButton(" &Guardar")
+        self.btn_guardar = QPushButton(" Guardar  (Ctrl+G)")
         self.btn_guardar.setObjectName("guardar")
         self.btn_guardar.setIcon(self.style().standardIcon(QStyle.SP_DialogSaveButton))  # disquete
-        self.btn_guardar.setToolTip("Guardar la factura en Odoo: Alt+G, o soltar Alt y luego G")
+        self.btn_guardar.setToolTip("Guardar la factura en Odoo (Ctrl+G)")
         self.btn_guardar.setFocusPolicy(Qt.NoFocus)  # el cursor se queda en la tabla
         self.btn_guardar.setCursor(Qt.PointingHandCursor)
         self.btn_guardar.clicked.connect(self.guardar)
@@ -127,10 +126,7 @@ class PantallaFactura(QWidget):
         raiz.addWidget(franja)
 
         QShortcut(QKeySequence("Ctrl+F"), self, self.ir_a_buscar)
-        # Soltar Alt y después presionar la letra (como los menús del sistema anterior)
-        self._alt_solo = False
-        self._modo_alt = False
-        QApplication.instance().installEventFilter(self)
+        QShortcut(QKeySequence("Ctrl+G"), self, self.guardar)
 
         self.recalcular()
 
@@ -146,47 +142,12 @@ class PantallaFactura(QWidget):
         elif not self.detalle.buscar_en_lineas(texto):
             self.no_encontrado.setText(f"«{texto.strip()}» no está en la factura")
 
-    # ---- Teclado de toda la pantalla ----
     def eventFilter(self, obj, event):
-        tipo = event.type()
-        if tipo in (QEvent.KeyPress, QEvent.KeyRelease) and self._es_de_esta_ventana(obj):
-            if self._atajo_alt(tipo, event):
-                return True
-            # Esc en el buscador: volver a la tabla
-            if obj is self.buscar and tipo == QEvent.KeyPress and event.key() == Qt.Key_Escape:
-                self.detalle.enfocar()
-                return True
-        return super().eventFilter(obj, event)
-
-    def _es_de_esta_ventana(self, obj) -> bool:
-        # Los diálogos (F9, mensajes) son otras ventanas: ahí no se interceptan teclas
-        return obj.isWidgetType() and self.isVisible() and obj.window() is self.window()
-
-    def _atajo_alt(self, tipo, event) -> bool:
-        """Soltar Alt deja la pantalla esperando una letra; G guarda. Devuelve True si la usó."""
-        tecla = event.key()
-        if tipo == QEvent.KeyRelease:
-            if tecla == Qt.Key_Alt and self._alt_solo:
-                self._alt_solo = False
-                self._marcar_modo_alt(True)
-            return False
-        if tecla == Qt.Key_Alt:
-            self._alt_solo = True  # todavía no se sabe si viene Alt+letra o Alt solo
-            return False
-        self._alt_solo = False
-        if not self._modo_alt:
-            return False
-        self._marcar_modo_alt(False)
-        if tecla == Qt.Key_G:
-            QTimer.singleShot(0, self.guardar)  # fuera del evento de teclado
+        # Esc en el buscador: volver a la tabla
+        if obj is self.buscar and event.type() == QEvent.KeyPress and event.key() == Qt.Key_Escape:
+            self.detalle.enfocar()
             return True
-        return tecla == Qt.Key_Escape  # Esc solo cancela el modo Alt
-
-    def _marcar_modo_alt(self, activo: bool):
-        self._modo_alt = activo
-        self.btn_guardar.setProperty("atajo", activo)
-        self.btn_guardar.style().unpolish(self.btn_guardar)
-        self.btn_guardar.style().polish(self.btn_guardar)
+        return super().eventFilter(obj, event)
 
     def recalcular(self):
         t0 = tiva = iva = 0.0
@@ -201,7 +162,7 @@ class PantallaFactura(QWidget):
             self.res[k].setText(f"{v:.2f}")
         self.total.setText(f"{t0 + tiva + iva:.2f}")
 
-    def guardar(self):  # 🟠 VENTA 0: Alt+G o botón Guardar
+    def guardar(self):  # 🟠 VENTA 0: Ctrl+G o botón Guardar
         lineas = self.detalle.productos()
         if not lineas:
             QMessageBox.information(self, "Guardar", "La factura no tiene productos.")

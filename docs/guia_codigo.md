@@ -16,7 +16,7 @@ líneas con fondo naranja y pone una marca naranja en la barra de scroll. Necesi
 |---|---|
 | `# 🟠 CONSULTA 1` … `# 🟠 CONSULTA 8` | Escribir un código + Enter, hasta que la fila se llena (sección 1) |
 | `# 🟠 CONSULTA F9` | Buscar en el Maestro de Artículos |
-| `# 🟠 VENTA 0` … `# 🟠 VENTA 7` | Alt+G: pedido, entrega (**VENTA 4: aquí baja el stock**), factura y pago (sección 2) |
+| `# 🟠 VENTA 0` … `# 🟠 VENTA 7` | Ctrl+G: pedido, entrega (**VENTA 4: aquí baja el stock**), factura y pago (sección 2) |
 | `# 🟠 LOGIN 1` … `# 🟠 LOGIN 4` | Entrar a la app (sección 3) |
 | `# 🟠 TABLA` | La DataTable del jefe y sus ajustes (sección 4) |
 | `# 🟠 EL POST A ODOO (JSON-2)` | La única línea que manda datos a Odoo |
@@ -47,7 +47,7 @@ flowchart TB
 | `src/controllers/venta_controller.py` | Guardar: pedido → entrega (baja el stock) → factura → pago |
 | `src/models/producto.py` | Convierte un producto de Odoo en un objeto `Producto` (Pydantic) |
 | `src/views/detalle_factura.py` | **La tabla de la factura** (la `DataTable` que dio el jefe) y sus teclas |
-| `src/views/factura_datatable_view.py` | La pantalla que contiene la tabla: buscador, totales, Guardar, Alt+G |
+| `src/views/factura_datatable_view.py` | La pantalla que contiene la tabla: buscador, totales, Guardar, Ctrl+G |
 | `src/views/articulos_dialog.py` | Ventana F9 (Maestro de Artículos) |
 | `src/views/login_view.py` | Ventana de login |
 | `src/views/factura_view.py` | Factura anterior (grilla de 10 filas), respaldo |
@@ -138,11 +138,11 @@ Lo que Odoo **responde**:
 
 ---
 
-## 2. Camino de una VENTA: Alt+G (Guardar)
+## 2. Camino de una VENTA: Ctrl+G (Guardar)
 
 ```mermaid
 flowchart TB
-    A["Alt+G o botón Guardar<br/>PantallaFactura.guardar"] --> B["VentaController.guardar"]
+    A["Ctrl+G o botón Guardar<br/>PantallaFactura.guardar"] --> B["VentaController.guardar"]
     B --> P1["1 sale.order / create<br/>pedido S0000X"]
     P1 --> P2["2 sale.order / action_confirm<br/>Odoo crea la entrega"]
     P2 --> P3["3 stock.move / write<br/>cantidad entregada"]
@@ -248,7 +248,7 @@ Lo que hubo que ajustarle a la librería (todo en [`_preparar_vista`](https://gi
 | Agregar o cambiar una columna de la factura | Lista `COLUMNAS` y diccionario de `_refrescar` en `detalle_factura.py` |
 | Cambiar qué columnas crecen más | `PESOS` en `detalle_factura.py` |
 | Cambiar una tecla de la tabla | `CodigoDelegate.eventFilter` en `detalle_factura.py` |
-| Cambiar Alt+G o Ctrl+F | `PantallaFactura.__init__` y `_atajo_alt` en `factura_datatable_view.py` |
+| Cambiar Ctrl+G o Ctrl+F | Los `QShortcut` de `PantallaFactura.__init__` en `factura_datatable_view.py` |
 | Cambiar qué crea Guardar en Odoo | `VentaController.guardar` en `venta_controller.py` |
 | Cambiar el diario del pago | `_diario_pago` en `venta_controller.py` |
 | Volver a la factura anterior (10 filas) | Comentario al inicio de `main.py` |

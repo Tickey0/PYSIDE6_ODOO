@@ -3,7 +3,7 @@
 Odoo encendido → navegador → `http://localhost:8069` → usuario `admin`, contraseña `admin`.
 Los menús se abren con el ícono de cuadritos ⋮⋮⋮ de arriba a la izquierda.
 
-Cuando en la app se presiona **Guardar** (Alt+G), Odoo crea 4 cosas enlazadas:
+Cuando en la app se presiona **Guardar** (Ctrl+G), Odoo crea 4 cosas enlazadas:
 
 | # | Qué | Dónde se ve |
 |---|---|---|

@@ -7,6 +7,11 @@ llevan a la línea exacta en GitHub.
 número que esta guía. Para verlas todas de una vez, en VS Code: **Ctrl+Shift+F** y buscar `🟠`
 (o `🟠 VENTA`, `🟠 CONSULTA`…).
 
+**Pintadas de naranja en VS Code:** el proyecto trae `.vscode/settings.json`, que pinta esas
+líneas con fondo naranja y pone una marca naranja en la barra de scroll. Necesita la extensión
+**Highlight** (`fabiospampinato.vscode-highlight`): al abrir la carpeta, VS Code la ofrece en
+"Extensiones recomendadas" → **Instalar**.
+
 | Marca en el código | Camino |
 |---|---|
 | `# 🟠 CONSULTA 1` … `# 🟠 CONSULTA 8` | Escribir un código + Enter, hasta que la fila se llena (sección 1) |

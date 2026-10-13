@@ -1,0 +1,26 @@
+{
+    // Pinta de naranja las líneas marcadas con 🟠 (los caminos de docs/guia_codigo.md):
+    // fondo naranja en toda la línea, el comentario en negrita y una marca naranja
+    // en la barra de scroll, como las marcas de cambios de git.
+    // Necesita la extensión "Highlight" (fabiospampinato.vscode-highlight).
+    "highlight.regexes": {
+        "^(.*?)(# 🟠.*)$": {
+            "regexFlags": "gm",
+            "filterLanguageRegex": "python",
+            "decorations": [
+                {
+                    "isWholeLine": true,
+                    "backgroundColor": "#f9731633",
+                    "overviewRulerColor": "#f97316",
+                    "borderColor": "#f97316",
+                    "borderStyle": "solid",
+                    "borderWidth": "0 0 0 3px"
+                },
+                {
+                    "color": "#f97316",
+                    "fontWeight": "bold"
+                }
+            ]
+        }
+    }
+}

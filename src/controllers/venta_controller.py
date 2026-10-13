@@ -54,6 +54,10 @@ class VentaController:
             paso = "crear el pedido de venta"
             pedido_id = odoo.call("sale.order", "create", vals_list=[{
                 "partner_id": cliente,
+                # Sin posición fiscal: el IVA es el del producto, el mismo que muestra la factura.
+                # (Con la empresa en EE.UU. y el cliente en Ecuador, Odoo aplicaba "Foreign
+                # Trade" y cambiaba el 15% por "0% Exports".)
+                "fiscal_position_id": False,
                 "order_line": [[0, 0, {"product_id": p.id, "product_uom_qty": cantidad,
                                        "price_unit": p.precio}]
                                for p, cantidad in lineas],

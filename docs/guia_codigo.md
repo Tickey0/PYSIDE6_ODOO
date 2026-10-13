@@ -159,7 +159,7 @@ flowchart TB
 
 | Paso | Archivo y línea | Llamada JSON-2 | Qué hace Odoo |
 |---|---|---|---|
-| 🟠 0 | [factura_datatable_view.py:204](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/factura_datatable_view.py#L204) `guardar` | — | Revisa stock, pide confirmación y llama al controlador ([línea 231](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/views/factura_datatable_view.py#L231)) |
+| 🟠 0 | [factura_datatable_view.py:165](https://github.com/Tickey0/PYSIDE6_ODOO/blob/1905fd9/src/views/factura_datatable_view.py#L165) `guardar` | — | Revisa stock, pide confirmación y llama al controlador ([línea 192](https://github.com/Tickey0/PYSIDE6_ODOO/blob/1905fd9/src/views/factura_datatable_view.py#L192)) |
 | 🟠 | [venta_controller.py:31](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L31) | `res.partner/search` (y `create` la 1ra vez) | Busca el cliente CONSUMIDOR FINAL (9999999999999) |
 | 🟠 1 | [venta_controller.py:55](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L55) | `sale.order/create` | Crea el **pedido** con las líneas (producto, cantidad, precio) |
 | 🟠 2 | [venta_controller.py:69](https://github.com/Tickey0/PYSIDE6_ODOO/blob/7ed66ad/src/controllers/venta_controller.py#L69) | `sale.order/action_confirm` | Confirma el pedido y **crea la entrega** `WH/OUT/...` |

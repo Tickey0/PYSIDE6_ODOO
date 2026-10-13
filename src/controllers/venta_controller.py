@@ -36,11 +36,13 @@ class VentaController:
         return self.odoo.call("res.partner", "create", vals_list=[
             {"name": CF_NOMBRE, "vat": CF_IDENTIFICACION}])[0]
 
-    def _diario_efectivo(self) -> int:
-        ids = self.odoo.call("account.journal", "search", limit=1, domain=[["type", "=", "cash"]])
-        if not ids:
-            raise OdooError("No hay un diario de tipo Efectivo en Odoo.")
-        return ids[0]
+    def _diario_pago(self) -> int:
+        """Diario de Efectivo; si la empresa no tiene uno, el de Banco."""
+        for tipo in ("cash", "bank"):
+            ids = self.odoo.call("account.journal", "search", limit=1, domain=[["type", "=", tipo]])
+            if ids:
+                return ids[0]
+        raise OdooError("No hay un diario de Efectivo ni de Banco en Odoo.")
 
     def guardar(self, lineas: list[tuple[Producto, float]]) -> dict:
         odoo = self.odoo
@@ -89,10 +91,10 @@ class VentaController:
             odoo.call("account.move", "action_post", ids=[factura_id])
             hecho.append("factura confirmada")
 
-            paso = "registrar el pago en efectivo"
+            paso = "registrar el pago"
             ctx_factura = self._ctx(active_model="account.move", active_ids=[factura_id])
             pago = odoo.call("account.payment.register", "create", context=ctx_factura,
-                             vals_list=[{"journal_id": self._diario_efectivo()}])[0]
+                             vals_list=[{"journal_id": self._diario_pago()}])[0]
             odoo.call("account.payment.register", "action_create_payments", ids=[pago], context=ctx_factura)
 
             factura = odoo.call("account.move", "read", ids=[factura_id],

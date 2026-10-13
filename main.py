@@ -4,16 +4,27 @@ from PySide6.QtGui import QColor, QPalette
 from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QTabWidget
 
 from src.controllers.producto_controller import ProductoController
+from src.controllers.venta_controller import VentaController
 from src.services.odoo_client import OdooClient, OdooError
-from src.views.factura_view import PantallaFactura
+from src.views.factura_datatable_view import PantallaFactura
 from src.views.login_view import LoginView
+
+# Para volver a la factura anterior (grilla fija de 10 filas, sin Guardar):
+#   from src.views.factura_view import PantallaFactura
+#   y en Ventana: self.addTab(PantallaFactura(productos), "Factura")
 
 
 class Ventana(QTabWidget):
-    def __init__(self, controller: ProductoController, sesion: dict):
+    def __init__(self, odoo: OdooClient, sesion: dict):
         super().__init__()
         self.setWindowTitle(f"Empresa: {sesion['empresa']} /Opcion: FACTURA /Usuario: {sesion['nombre']}")
-        self.addTab(PantallaFactura(controller), "Factura")
+        productos = ProductoController(odoo)
+        self.factura = PantallaFactura(productos, VentaController(odoo))
+        self.addTab(self.factura, "Factura")
+
+    def showEvent(self, event):
+        super().showEvent(event)
+        self.factura.detalle.enfocar()
 
 
 def paleta_clara(app: QApplication):
@@ -54,8 +65,9 @@ def main():
     if not sesion:
         return 0
 
-    ventana = Ventana(ProductoController(odoo), sesion)
-    ventana.resize(1000, 520)
+    ventana = Ventana(odoo, sesion)
+    ventana.setMinimumHeight(460)  # el ancho mínimo lo pone la franja de totales, para que no se corte
+    ventana.resize(1100, 600)
     ventana.show()
     return app.exec()
 

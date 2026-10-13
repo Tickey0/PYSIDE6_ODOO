@@ -24,7 +24,9 @@ class ProductoController:
         filas = self.odoo.call("product.product", "search_read",
                                domain=DOMINIO_BASE + domain,
                                fields=list(Producto.CAMPOS),
-                               limit=limit, order="name")
+                               limit=limit, order="name",
+                               # sin el "[referencia]" delante del nombre
+                               context={**self.odoo.context, "display_default_code": False})
         productos = [Producto.model_validate(f) for f in filas]
         for p in productos:
             p.iva = self._porcentaje_iva(p.impuestos)

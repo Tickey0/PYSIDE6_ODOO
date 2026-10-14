@@ -3,8 +3,9 @@
 Se puede correr varias veces: si un producto ya existe (misma referencia) no lo
 duplica, solo le ajusta el stock si no coincide.
 Uso:  python -m scripts.cargar_inventario
+      python -m scripts.cargar_inventario --env .env.odoo19   (otro Odoo)
 """
-from src.services.odoo_client import OdooClient
+from src.services.odoo_client import OdooClient, archivo_env
 
 # (nombre, referencia, código de barras, precio sin IVA, lleva IVA 15%, stock)
 PRODUCTOS = [
@@ -19,11 +20,27 @@ PRODUCTOS = [
 ]
 
 
-def main():
-    odoo = OdooClient.desde_env()
+def impuesto(odoo, porcentaje: float, nombre_ecuador: str) -> list[int]:
+    """IVA de venta para bienes.
 
-    iva15 = odoo.call("account.tax", "search", limit=1, domain=[
-        ["type_tax_use", "=", "sale"], ["amount_type", "=", "percent"], ["amount", "=", 15]])
+    Con la localización de Ecuador usa el del SRI (ej. "IVA 0% (415, B)"): el SRI pide un
+    impuesto en cada línea, también en las de 0%. Sin ella, el primero con ese porcentaje,
+    y ninguno para 0%.
+    """
+    base = [["type_tax_use", "=", "sale"], ["amount_type", "=", "percent"], ["amount", "=", porcentaje]]
+    ids = odoo.call("account.tax", "search", limit=1, context={"lang": "es_EC"},
+                    domain=base + [["name", "=", nombre_ecuador]])
+    if ids or porcentaje == 0:
+        return ids
+    return odoo.call("account.tax", "search", limit=1, domain=base)
+
+
+def main():
+    odoo = OdooClient.desde_env(archivo_env())
+    print(f"Odoo: {odoo.url}  base: {odoo.db}")
+
+    iva15 = impuesto(odoo, 15, "IVA 15% (411, B)")
+    iva0 = impuesto(odoo, 0, "IVA 0% (415, B)")
     bodega = odoo.call("stock.warehouse", "search_read", domain=[], fields=["lot_stock_id"], limit=1)
     ubicacion = bodega[0]["lot_stock_id"][0]
 
@@ -43,7 +60,7 @@ def main():
                 "type": "consu",
                 "is_storable": True,
                 "available_in_pos": True,
-                "taxes_id": [[6, 0, iva15 if con_iva else []]],
+                "taxes_id": [[6, 0, iva15 if con_iva else iva0]],
             }])[0]
             producto_id = odoo.call("product.product", "search",
                                     domain=[["product_tmpl_id", "=", tmpl_id]], limit=1)[0]

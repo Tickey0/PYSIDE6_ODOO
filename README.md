@@ -80,6 +80,8 @@ IPv6 primero y cada llamada tarda 15 segundos.
 .venv\Scripts\python -m scripts.cargar_inventario --env .env.odoo19
 ```
 
+Ejemplos de consultas a la API (solo leen): `python -m scripts.ejemplos_api --env .env.odoo19`.
+
 Crea 8 productos con stock (no duplica si ya existen). Con la localización de
 Ecuador usa los IVA del SRI para bienes: 15% (411, B) y 0% (415, B).
 

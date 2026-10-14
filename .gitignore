@@ -1,5 +1,7 @@
 .venv/
 __pycache__/
 *.pyc
-# Tiene la clave API: nunca subirlo a git
+# Tienen la clave API: nunca subirlos a git (.env = Odoo 20, .env.odoo19 = Odoo 19, ...)
 .env
+.env.*
+!.env.example

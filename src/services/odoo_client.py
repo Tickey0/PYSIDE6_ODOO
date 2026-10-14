@@ -4,13 +4,20 @@ Cada llamada es un POST a /json/2/<modelo>/<metodo>, autenticado con una
 clave API en la cabecera Authorization. Los argumentos van siempre con
 nombre (domain=..., fields=...), nunca por posicion.
 """
-import os
+import sys
 from pathlib import Path
 
 import requests
-from dotenv import load_dotenv
+from dotenv import dotenv_values
 
 RAIZ = Path(__file__).resolve().parents[2]
+
+
+def archivo_env() -> str:
+    """Archivo de configuración a usar: `--env .env.odoo19` en la línea de comandos, o `.env`."""
+    if "--env" in sys.argv[:-1]:
+        return sys.argv[sys.argv.index("--env") + 1]
+    return ".env"
 
 
 class OdooError(Exception):
@@ -31,13 +38,16 @@ class OdooClient:
         })
 
     @classmethod
-    def desde_env(cls):
-        """Lee ODOO_URL, ODOO_DB y ODOO_API_KEY del archivo .env del proyecto."""
-        load_dotenv(RAIZ / ".env")
-        faltan = [v for v in ("ODOO_URL", "ODOO_DB", "ODOO_API_KEY") if not os.getenv(v)]
+    def desde_env(cls, archivo: str = ".env"):
+        """Lee ODOO_URL, ODOO_DB y ODOO_API_KEY de un archivo del proyecto (.env, .env.odoo19…)."""
+        ruta = RAIZ / archivo
+        if not ruta.is_file():
+            raise OdooError(f"No existe el archivo de configuración {archivo}")
+        valores = dotenv_values(ruta)
+        faltan = [v for v in ("ODOO_URL", "ODOO_DB", "ODOO_API_KEY") if not valores.get(v)]
         if faltan:
-            raise OdooError(f"Faltan en el archivo .env: {', '.join(faltan)}")
-        return cls(os.getenv("ODOO_URL"), os.getenv("ODOO_DB"), os.getenv("ODOO_API_KEY"))
+            raise OdooError(f"Faltan en el archivo {archivo}: {', '.join(faltan)}")
+        return cls(valores["ODOO_URL"], valores["ODOO_DB"], valores["ODOO_API_KEY"])
 
     def version(self) -> str:
         try:

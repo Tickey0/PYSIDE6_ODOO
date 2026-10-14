@@ -6,7 +6,7 @@ from PySide6.QtWidgets import QApplication, QDialog, QMessageBox, QTabWidget
 
 from src.controllers.producto_controller import ProductoController
 from src.controllers.venta_controller import VentaController
-from src.services.odoo_client import OdooClient, OdooError
+from src.services.odoo_client import OdooClient, OdooError, archivo_env
 from src.views.factura_datatable_view import PantallaFactura
 from src.views.login_view import LoginView
 
@@ -63,7 +63,7 @@ def main():  # 🟠 LOGIN 1: lee .env y revisa que Odoo responda
     app = QApplication(sys.argv)
     paleta_clara(app)
     try:
-        odoo = OdooClient.desde_env()
+        odoo = OdooClient.desde_env(archivo_env())  # .env, o el de --env (ej. .env.odoo19)
         odoo.version()
     except OdooError as e:
         QMessageBox.critical(None, "Odoo", str(e))

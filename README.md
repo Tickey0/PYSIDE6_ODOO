@@ -14,6 +14,12 @@ cd C:\DOCKER\odoo\odoo_pyside6
 
 Login: `admin` / `admin`.
 
+Para conectarse a otro Odoo, con su propio archivo de configuración:
+
+```
+.venv\Scripts\python main.py --env .env.odoo19
+```
+
 ## Teclas en la factura
 
 | Tecla | Qué hace |
@@ -53,8 +59,16 @@ flechas para elegir, Enter acepta, Esc cancela.
 ## Configuración
 
 Copiar `.env.example` a `.env` y poner la clave API
-(Odoo → avatar → Preferencias → Seguridad de la cuenta → Nueva clave API).
-`.env` no se sube a git.
+(Odoo → avatar → Preferencias → Seguridad → Agregar clave API).
+
+Un archivo por cada Odoo; se elige con `--env` (sin `--env` se usa `.env`):
+
+| Archivo | Odoo | ODOO_URL | ODOO_DB |
+|---|---|---|---|
+| `.env` | 20 | `http://127.0.0.1:8069` | `odoo20` |
+| `.env.odoo19` | 19 + localización Ecuador | `http://127.0.0.1:8019` | `odoo19_ec` |
+
+Ningún `.env*` se sube a git (salvo `.env.example`): tienen la clave API.
 
 Usar `127.0.0.1` y no `localhost` en `ODOO_URL`: en Windows `localhost` intenta
 IPv6 primero y cada llamada tarda 15 segundos.
@@ -63,9 +77,11 @@ IPv6 primero y cada llamada tarda 15 segundos.
 
 ```
 .venv\Scripts\python -m scripts.cargar_inventario
+.venv\Scripts\python -m scripts.cargar_inventario --env .env.odoo19
 ```
 
-Crea 8 productos con stock (no duplica si ya existen).
+Crea 8 productos con stock (no duplica si ya existen). Con la localización de
+Ecuador usa los IVA del SRI para bienes: 15% (411, B) y 0% (415, B).
 
 ## Estructura (MVC)
 
